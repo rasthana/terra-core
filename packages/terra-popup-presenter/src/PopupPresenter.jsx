@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom'
 import onClickOutside from 'react-onclickoutside'
 import PopupFrame from './PopupFrame'
 import TetherComponent from './TetherComponent'
+import { Manager, Target, Popper, Arrow } from 'react-popper'
 import './PopupPresenter.scss';
 
 const propTypes = {
@@ -142,39 +143,71 @@ class PopupPresenter extends React.Component {
       );
     }
 
-    const tetherOptions = {
-      contentAttachment,
-      isEnabled: true,
-      target,
-    };
-
-    //Optional parameters
-    if (wrappedContent) {
-      tetherOptions.content = wrappedContent;
-    }
-    if (constraints) {
-      tetherOptions.constraints = constraints;
-    }
-    if (contentOffset) {
-      tetherOptions.offset = contentOffset;
-    }
-    // if (targetOffset) {
-    //   tetherOptions.targetOffset = targetOffset;
+    // const tetherOptions = {
+    //   contentAttachment,
+    //   isEnabled: true,
+    //   target,
+    // };
+    // 
+    // //Optional parameters
+    // if (wrappedContent) {
+    //   tetherOptions.content = wrappedContent;
     // }
-    if (targetAttachment) {
-      tetherOptions.targetAttachment = targetAttachment;
-    }
-    if (renderElementTo) {
-      tetherOptions.renderElementTo = renderElementTo;
-    }
+    // if (constraints) {
+    //   tetherOptions.constraints = constraints;
+    // }
+    // if (contentOffset) {
+    //   tetherOptions.offset = contentOffset;
+    // }
+    // // if (targetOffset) {
+    // //   tetherOptions.targetOffset = targetOffset;
+    // // }
+    // if (targetAttachment) {
+    //   tetherOptions.targetAttachment = targetAttachment;
+    // }
+    // if (renderElementTo) {
+    //   tetherOptions.renderElementTo = renderElementTo;
+    // }
 
-    tetherOptions.classes = {
-      element: 'terra-PopupPresenter'
-    };
+    // tetherOptions.classes = {
+    //   element: 'terra-PopupPresenter'
+    // };
 
-    //kasper check here if parent node is a modal.... this is going to get messy
-    //Portal or ModalContent
-    return <TetherComponent {...tetherOptions} />;
+    // //kasper check here if parent node is a modal.... this is going to get messy
+    // //Portal or ModalContent
+    // return <TetherComponent {...tetherOptions} />;
+
+    const reference = document.querySelector('.my-button');
+    const popper = document.querySelector('.my-popper');
+    const superPopper = new Popper(reference, popper, {
+        onCreate: (data) => {
+            // data is an object containing all the informations computed
+            // by Popper.js and used to style the popper and its arrow
+            // The complete description is available in Popper.js documentation
+        },
+        onUpdate: (data) => {
+            // same as `onCreate` but called on subsequent updates
+        }
+    });
+
+    return createElement(
+      tag,
+      {
+        ...restProps,
+        ref: node => {
+          popperRef(node)
+          if (typeof innerRef === 'function') {
+            innerRef(node)
+          }
+        },
+        style: {
+          ...restProps.style,
+          ...popperStyle,
+        },
+        'data-placement': popperPlacement,
+      },
+      children
+    )
   }
 }
 

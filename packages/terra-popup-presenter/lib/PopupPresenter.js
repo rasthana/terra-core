@@ -32,6 +32,8 @@ var _TetherComponent = require('./TetherComponent');
 
 var _TetherComponent2 = _interopRequireDefault(_TetherComponent);
 
+var _reactPopper = require('react-popper');
+
 require('./PopupPresenter.scss');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -128,39 +130,61 @@ var PopupPresenter = function (_React$Component) {
         );
       }
 
-      var tetherOptions = {
-        contentAttachment: contentAttachment,
-        isEnabled: true,
-        target: target
-      };
-
-      //Optional parameters
-      if (wrappedContent) {
-        tetherOptions.content = wrappedContent;
-      }
-      if (constraints) {
-        tetherOptions.constraints = constraints;
-      }
-      if (contentOffset) {
-        tetherOptions.offset = contentOffset;
-      }
-      // if (targetOffset) {
-      //   tetherOptions.targetOffset = targetOffset;
+      // const tetherOptions = {
+      //   contentAttachment,
+      //   isEnabled: true,
+      //   target,
+      // };
+      // 
+      // //Optional parameters
+      // if (wrappedContent) {
+      //   tetherOptions.content = wrappedContent;
       // }
-      if (targetAttachment) {
-        tetherOptions.targetAttachment = targetAttachment;
-      }
-      if (renderElementTo) {
-        tetherOptions.renderElementTo = renderElementTo;
-      }
+      // if (constraints) {
+      //   tetherOptions.constraints = constraints;
+      // }
+      // if (contentOffset) {
+      //   tetherOptions.offset = contentOffset;
+      // }
+      // // if (targetOffset) {
+      // //   tetherOptions.targetOffset = targetOffset;
+      // // }
+      // if (targetAttachment) {
+      //   tetherOptions.targetAttachment = targetAttachment;
+      // }
+      // if (renderElementTo) {
+      //   tetherOptions.renderElementTo = renderElementTo;
+      // }
 
-      tetherOptions.classes = {
-        element: 'terra-PopupPresenter'
-      };
+      // tetherOptions.classes = {
+      //   element: 'terra-PopupPresenter'
+      // };
 
-      //kasper check here if parent node is a modal.... this is going to get messy
-      //Portal or ModalContent
-      return _react2.default.createElement(_TetherComponent2.default, tetherOptions);
+      // //kasper check here if parent node is a modal.... this is going to get messy
+      // //Portal or ModalContent
+      // return <TetherComponent {...tetherOptions} />;
+
+      return _react2.default.createElement(
+        _reactPopper.Manager,
+        null,
+        _react2.default.createElement(
+          _reactPopper.Target,
+          { style: { width: 120, height: 120, background: '#b4da55' } },
+          'Target Box'
+        ),
+        _react2.default.createElement(
+          _reactPopper.Popper,
+          { placement: 'left', className: 'popper' },
+          'wrappedContent left',
+          _react2.default.createElement(_reactPopper.Arrow, { className: 'popper__arrow' })
+        ),
+        _react2.default.createElement(
+          _reactPopper.Popper,
+          { placement: 'right', className: 'popper' },
+          'wrappedContent right',
+          _react2.default.createElement(_reactPopper.Arrow, { className: 'popper__arrow' })
+        )
+      );
     }
   }], [{
     key: 'arrowAlignmentFromAttachment',
