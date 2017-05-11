@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require('react');
@@ -164,27 +166,29 @@ var PopupPresenter = function (_React$Component) {
       // //Portal or ModalContent
       // return <TetherComponent {...tetherOptions} />;
 
-      return _react2.default.createElement(
-        _reactPopper.Manager,
-        null,
-        _react2.default.createElement(
-          _reactPopper.Target,
-          { style: { width: 120, height: 120, background: '#b4da55' } },
-          'Target Box'
-        ),
-        _react2.default.createElement(
-          _reactPopper.Popper,
-          { placement: 'left', className: 'popper' },
-          'wrappedContent left',
-          _react2.default.createElement(_reactPopper.Arrow, { className: 'popper__arrow' })
-        ),
-        _react2.default.createElement(
-          _reactPopper.Popper,
-          { placement: 'right', className: 'popper' },
-          'wrappedContent right',
-          _react2.default.createElement(_reactPopper.Arrow, { className: 'popper__arrow' })
-        )
-      );
+      var reference = document.querySelector('.my-button');
+      var popper = document.querySelector('.my-popper');
+      var superPopper = new _reactPopper.Popper(reference, popper, {
+        onCreate: function onCreate(data) {
+          // data is an object containing all the informations computed
+          // by Popper.js and used to style the popper and its arrow
+          // The complete description is available in Popper.js documentation
+        },
+        onUpdate: function onUpdate(data) {
+          // same as `onCreate` but called on subsequent updates
+        }
+      });
+
+      return createElement(tag, _extends({}, restProps, {
+        ref: function ref(node) {
+          popperRef(node);
+          if (typeof innerRef === 'function') {
+            innerRef(node);
+          }
+        },
+        style: _extends({}, restProps.style, popperStyle),
+        'data-placement': popperPlacement
+      }), children);
     }
   }], [{
     key: 'arrowAlignmentFromAttachment',
