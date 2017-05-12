@@ -4,10 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require('react');
@@ -34,6 +30,10 @@ var _TetherComponent = require('./TetherComponent');
 
 var _TetherComponent2 = _interopRequireDefault(_TetherComponent);
 
+var _PopperLoader = require('./PopperLoader');
+
+var _PopperLoader2 = _interopRequireDefault(_PopperLoader);
+
 var _reactPopper = require('react-popper');
 
 require('./PopupPresenter.scss');
@@ -49,24 +49,17 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var propTypes = {
-  /**
-   * The children list items passed to the component.
-   */
   closeOnEsc: _react.PropTypes.bool,
   closeOnOutsideClick: _react.PropTypes.bool,
   content: _react.PropTypes.element,
-  contentAttachment: _react.PropTypes.oneOf(_TetherComponent2.default.attachmentPositions).isRequired,
   isOpen: _react.PropTypes.bool,
   onRequestClose: _react.PropTypes.func,
-  renderElementTo: _react.PropTypes.any,
-  showArrow: _react.PropTypes.bool,
   target: _react.PropTypes.element.isRequired,
-  targetAttachment: _react.PropTypes.oneOf(_TetherComponent2.default.attachmentPositions)
+  targetRef: _react.PropTypes.func
 };
 
 var defaultProps = {
-  isOpen: false,
-  showArrow: false
+  isOpen: false
 };
 
 var WrappedPopupFrame = (0, _reactOnclickoutside2.default)(_PopupFrame2.default);
@@ -74,55 +67,46 @@ var WrappedPopupFrame = (0, _reactOnclickoutside2.default)(_PopupFrame2.default)
 var PopupPresenter = function (_React$Component) {
   _inherits(PopupPresenter, _React$Component);
 
-  function PopupPresenter() {
+  function PopupPresenter(props) {
     _classCallCheck(this, PopupPresenter);
 
-    return _possibleConstructorReturn(this, (PopupPresenter.__proto__ || Object.getPrototypeOf(PopupPresenter)).apply(this, arguments));
+    var _this = _possibleConstructorReturn(this, (PopupPresenter.__proto__ || Object.getPrototypeOf(PopupPresenter)).call(this, props));
+
+    _this.setContentNode = _this.setContentNode.bind(_this);
+    return _this;
   }
 
   _createClass(PopupPresenter, [{
+    key: 'setContentNode',
+    value: function setContentNode(node) {
+      if (node === null) {
+        return;
+      } // Ref callbacks happen on mount and unmount, element will be null on unmount
+      this.contentNode = node;
+    }
+  }, {
     key: 'render',
     value: function render() {
+      var _this2 = this;
+
       var _props = this.props,
-          className = _props.className,
           closeOnEsc = _props.closeOnEsc,
           closeOnOutsideClick = _props.closeOnOutsideClick,
           content = _props.content,
-          contentAttachment = _props.contentAttachment,
           isOpen = _props.isOpen,
           onRequestClose = _props.onRequestClose,
-          renderElementTo = _props.renderElementTo,
           target = _props.target,
-          targetAttachment = _props.targetAttachment,
-          showArrow = _props.showArrow,
-          customProps = _objectWithoutProperties(_props, ['className', 'closeOnEsc', 'closeOnOutsideClick', 'content', 'contentAttachment', 'isOpen', 'onRequestClose', 'renderElementTo', 'target', 'targetAttachment', 'showArrow']); // eslint-disable-line no-unused-vars
+          targetRef = _props.targetRef,
+          customProps = _objectWithoutProperties(_props, ['closeOnEsc', 'closeOnOutsideClick', 'content', 'isOpen', 'onRequestClose', 'target', 'targetRef']); // eslint-disable-line no-unused-vars
 
       var wrappedContent = void 0;
-      var contentOffset = PopupPresenter.caculateContentOffset(contentAttachment, targetAttachment);
-      var constraints = [{
-        to: 'scrollParent',
-        // attachment: 'together',
-        pin: true
-      }, {
-        to: 'window',
-        // attachment: 'together',
-        pin: true
-      }];
-
       if (isOpen && content) {
-        var arrowAlignment = PopupPresenter.arrowAlignmentFromAttachment(contentAttachment);
-        var arrowPosition = PopupPresenter.arrowPositionFromAttachment(contentAttachment);
-        var arrowPxOffset = PopupPresenter.calculateArrowOffest(arrowPosition, contentOffset, '0 0');
-
         var frameProps = {
-          className: className,
           closeOnEsc: closeOnEsc,
           closeOnOutsideClick: closeOnOutsideClick,
           onRequestClose: onRequestClose,
-          arrowAlignment: arrowAlignment,
-          arrowPosition: arrowPosition,
-          showArrow: PopupPresenter.shouldDisplayArrow(showArrow, contentAttachment),
-          arrowPxOffset: arrowPxOffset
+          showArrow: false,
+          ref: this.setContentNode
         };
 
         wrappedContent = _react2.default.createElement(
@@ -132,132 +116,19 @@ var PopupPresenter = function (_React$Component) {
         );
       }
 
-      // const tetherOptions = {
-      //   contentAttachment,
-      //   isEnabled: true,
-      //   target,
-      // };
-      // 
-      // //Optional parameters
-      // if (wrappedContent) {
-      //   tetherOptions.content = wrappedContent;
-      // }
-      // if (constraints) {
-      //   tetherOptions.constraints = constraints;
-      // }
-      // if (contentOffset) {
-      //   tetherOptions.offset = contentOffset;
-      // }
-      // // if (targetOffset) {
-      // //   tetherOptions.targetOffset = targetOffset;
-      // // }
-      // if (targetAttachment) {
-      //   tetherOptions.targetAttachment = targetAttachment;
-      // }
-      // if (renderElementTo) {
-      //   tetherOptions.renderElementTo = renderElementTo;
-      // }
+      var contentRef = function contentRef() {
+        return _this2.contentNode;
+      };
 
-      // tetherOptions.classes = {
-      //   element: 'terra-PopupPresenter'
-      // };
+      var popperOptions = {
+        content: wrappedContent,
+        contentRef: contentRef,
+        target: target,
+        targetRef: targetRef,
+        isOpen: isOpen
+      };
 
-      // //kasper check here if parent node is a modal.... this is going to get messy
-      // //Portal or ModalContent
-      // return <TetherComponent {...tetherOptions} />;
-
-      var reference = document.querySelector('.my-button');
-      var popper = document.querySelector('.my-popper');
-      var superPopper = new _reactPopper.Popper(reference, popper, {
-        onCreate: function onCreate(data) {
-          // data is an object containing all the informations computed
-          // by Popper.js and used to style the popper and its arrow
-          // The complete description is available in Popper.js documentation
-        },
-        onUpdate: function onUpdate(data) {
-          // same as `onCreate` but called on subsequent updates
-        }
-      });
-
-      return createElement(tag, _extends({}, restProps, {
-        ref: function ref(node) {
-          popperRef(node);
-          if (typeof innerRef === 'function') {
-            innerRef(node);
-          }
-        },
-        style: _extends({}, restProps.style, popperStyle),
-        'data-placement': popperPlacement
-      }), children);
-    }
-  }], [{
-    key: 'arrowAlignmentFromAttachment',
-    value: function arrowAlignmentFromAttachment(contentAttachment) {
-      var parsedAttachment = PopupPresenter.parseStringPosition(contentAttachment);
-
-      if (parsedAttachment.vertical === 'middle' || parsedAttachment.horizontal === 'center') {
-        return 'Center';
-      } else if (parsedAttachment.horizontal === 'left') {
-        return 'Start';
-      } else {
-        return 'End';
-      }
-    }
-  }, {
-    key: 'arrowPositionFromAttachment',
-    value: function arrowPositionFromAttachment(contentAttachment) {
-      var parsedAttachment = PopupPresenter.parseStringPosition(contentAttachment);
-
-      if (parsedAttachment.vertical === 'top') {
-        return 'Top';
-      } else if (parsedAttachment.vertical === 'middle') {
-        if (parsedAttachment.horizontal === 'left') {
-          return 'Start';
-        }
-        return 'End';
-      } else {
-        return 'Bottom';
-      }
-    }
-  }, {
-    key: 'parseOffset',
-    value: function parseOffset(value) {
-      var parsedValue = PopupPresenter.parseStringPosition(value);
-      return { vertical: parseFloat(parsedValue.vertical), horizontal: parseFloat(parsedValue.horizontal) };
-    }
-  }, {
-    key: 'parseStringPosition',
-    value: function parseStringPosition(value) {
-      var _value$split = value.split(' '),
-          _value$split2 = _slicedToArray(_value$split, 2),
-          vertical = _value$split2[0],
-          horizontal = _value$split2[1];
-
-      return { vertical: vertical, horizontal: horizontal };
-    }
-  }, {
-    key: 'shouldDisplayArrow',
-    value: function shouldDisplayArrow(showArrow, contentAttachment) {
-      if (showArrow === true && contentAttachment === 'middle center') {
-        return false;
-      }
-      return showArrow;
-    }
-  }, {
-    key: 'calculateArrowOffest',
-    value: function calculateArrowOffest(position, contentOffset, targetOffset) {
-      var parsedContentValue = PopupPresenter.parseOffset(contentOffset); // {verticalPx, horizontalPx}
-      var parsedTargetValue = PopupPresenter.parseOffset(targetOffset); // {verticalPx, horizontalPx}
-
-      if (['Top', 'Bottom'].indexOf(position) >= 0) {
-        return parsedContentValue.horizontal + parsedTargetValue.horizontal;
-      }
-      return parsedContentValue.vertical + parsedTargetValue.vertical;
-    }
-  }, {
-    key: 'caculateContentOffset',
-    value: function caculateContentOffset(contentAttachment, targetAttachment) {
-      return '0 0';
+      return _react2.default.createElement(_PopperLoader2.default, popperOptions);
     }
   }]);
 

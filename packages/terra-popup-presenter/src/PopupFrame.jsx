@@ -54,8 +54,8 @@ const defaultProps = {
   closeOnEsc: true,
   closeOnOutsideClick: true,
   onRequestClose: undefined,
-  arrowAlignment: 'middle',
-  arrowPosition: 'top',
+  arrowAlignment: 'Center',
+  arrowPosition: 'Top',
   showArrow: true,
 };
 

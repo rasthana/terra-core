@@ -1,16 +1,21 @@
 import React, { PropTypes } from 'react';
 import classNames from 'classnames';
+import ReactDOM from 'react-dom';
+import Popper from 'popper.js'
 
 const propTypes = {
+  content: PropTypes.element,
+  contentRef: PropTypes.func,
+  target: PropTypes.element,
   targetRef: PropTypes.func,
-  popupFrameRef: PropTypes.func,
   parentId: PropTypes.string,
   placement: PropTypes.string,
 };
 
 const defaultProps = {
+  target: undefined,
   targetRef: undefined,
-  popupFrameRef: undefined,
+  popupFrame: undefined,
   parentId: undefined,
   placement: 'bottom-start',
 };
@@ -22,17 +27,57 @@ class PopperLoader extends React.Component {
     this.state = { data: { offsets: { popper: { top: 0, left: 0 } } } };
   }
 
-  // componentDidMount() {
-  //   this._targetNode = ReactDOM.findDOMNode(this);
-  //   this._update();
-  // }
-
-  // componentWillUnmount() {
-  //   this._destroy();
-  // }
-
   componentDidMount() {
-    const boundingElement = document.getElementById(this.props.parentId) || scrollParent;
+    this.targetNode = this.props.targetRef;
+    this.popupFrameNode = this.props.contentRef;
+    this.updatePopper();
+  }
+
+  componentDidUpdate() {
+    this.updatePopper();
+  }
+
+  componentWillUnmount() {
+    this.destroyPopper();
+  }
+
+  destroyPopper() {
+    if (this.elementParentNode) {
+      this.elementParentNode.removeChild(this.popupFrameNode);
+    }
+
+    if (this.popper) {
+      this.popper.destroy();
+    }
+
+    this.elementParentNode = null;
+    this.popper = null;
+  }
+
+  updatePopper() {
+    const { content } = this.props;
+
+    if (!content) {
+      if (this.popper) {
+        this.destroyPopper();
+      }
+      return;
+    }
+    
+    if (!this.elementParentNode) {
+      this.elementParentNode = document.createElement('div');
+      document.body.appendChild(this.elementParentNode);
+    }
+
+    ReactDOM.unstable_renderSubtreeIntoContainer(
+      this, content, this.elementParentNode, () => {
+        this.createPopper();
+      }
+    )
+  }
+
+  createPopper() {
+    const boundingElement = document.getElementById(this.props.parentId) || 'scrollParent';
 
     const configuration = {
       placement: 'bottom-start',
@@ -44,9 +89,9 @@ class PopperLoader extends React.Component {
     };
 
     // create a new popper.js instance
-    const popper = new Popper(
-      this.props.targetRef,
-      this.refs.popupFrameRef,
+    this.popper = new Popper(
+      this.targetNode(),
+      this.popupFrameNode(),
       configuration,
     );
     // schedule the first update after the component has been fully rendered
@@ -55,7 +100,7 @@ class PopperLoader extends React.Component {
     });
     // on each popper.js update, update the state
     popper.onUpdate(function(data) {
-      _this.setState({data: data});
+      this.setState({data: data});
     });
   }
 
@@ -66,10 +111,8 @@ class PopperLoader extends React.Component {
       top: 0,
       left: 0
     }
-    return <div>
-      <this.props.popper ref="popper" text="pop" style={css}/>
-      <this.props.reference ref="reference" text="ref"/>
-    </div>;
+  
+    return this.props.target;
   }
 }
 

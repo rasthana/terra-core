@@ -7,6 +7,7 @@ class DummyApp extends React.Component {
     super(props);
     this.handleButtonClick = this.handleButtonClick.bind(this);
     this.handleRequestClose = this.handleRequestClose.bind(this);
+    this.setTargetNode = this.setTargetNode.bind(this);
     this.state = {open: false};
   }
 
@@ -18,17 +19,25 @@ class DummyApp extends React.Component {
     this.setState({open: false});
   }
 
+  setTargetNode(node) {
+    if (node === null) { return; } // Ref callbacks happen on mount and unmount, element will be null on unmount
+    this.targetNode = node;
+  }
+
   render() {
     const contentSection = <p style={{height: '200px', width: '200px'}}>i'm popup content, hear me roar!</p>;
+
+    const targetRef = () => {
+      return this.targetNode;
+    };
 
     return (
       <PopupPresenter 
         content={contentSection}
-        contentAttachment="bottom center"
         isOpen={this.state.open}
         showArrow
-        target={<Button text="popup button launcher" onClick={this.handleButtonClick} />}
-        targetAttachment="top center"
+        target={<Button text="popup button launcher" onClick={this.handleButtonClick} ref={this.setTargetNode} />}
+        targetRef={targetRef}
         onRequestClose={this.handleRequestClose}
       />
     );

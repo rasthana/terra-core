@@ -14,6 +14,14 @@ var _classnames = require('classnames');
 
 var _classnames2 = _interopRequireDefault(_classnames);
 
+var _reactDom = require('react-dom');
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _popper = require('popper.js');
+
+var _popper2 = _interopRequireDefault(_popper);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23,15 +31,18 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var propTypes = {
+  content: _react.PropTypes.element,
+  contentRef: _react.PropTypes.func,
+  target: _react.PropTypes.element,
   targetRef: _react.PropTypes.func,
-  popupFrameRef: _react.PropTypes.func,
   parentId: _react.PropTypes.string,
   placement: _react.PropTypes.string
 };
 
 var defaultProps = {
+  target: undefined,
   targetRef: undefined,
-  popupFrameRef: undefined,
+  popupFrame: undefined,
   parentId: undefined,
   placement: 'bottom-start'
 };
@@ -42,25 +53,71 @@ var PopperLoader = function (_React$Component) {
   function PopperLoader(props) {
     _classCallCheck(this, PopperLoader);
 
-    var _this2 = _possibleConstructorReturn(this, (PopperLoader.__proto__ || Object.getPrototypeOf(PopperLoader)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (PopperLoader.__proto__ || Object.getPrototypeOf(PopperLoader)).call(this, props));
 
-    _this2.state = { data: { offsets: { popper: { top: 0, left: 0 } } } };
-    return _this2;
+    _this.state = { data: { offsets: { popper: { top: 0, left: 0 } } } };
+    return _this;
   }
-
-  // componentDidMount() {
-  //   this._targetNode = ReactDOM.findDOMNode(this);
-  //   this._update();
-  // }
-
-  // componentWillUnmount() {
-  //   this._destroy();
-  // }
 
   _createClass(PopperLoader, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var boundingElement = document.getElementById(this.props.parentId) || scrollParent;
+      this.targetNode = this.props.targetRef;
+      this.popupFrameNode = this.props.contentRef;
+      this.updatePopper();
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      this.updatePopper();
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      this.destroyPopper();
+    }
+  }, {
+    key: 'destroyPopper',
+    value: function destroyPopper() {
+      if (this.elementParentNode) {
+        this.elementParentNode.removeChild(this.popupFrameNode);
+      }
+
+      if (this.popper) {
+        this.popper.destroy();
+      }
+
+      this.elementParentNode = null;
+      this.popper = null;
+    }
+  }, {
+    key: 'updatePopper',
+    value: function updatePopper() {
+      var _this2 = this;
+
+      var content = this.props.content;
+
+
+      if (!content) {
+        if (this.popper) {
+          this.destroyPopper();
+        }
+        return;
+      }
+
+      if (!this.elementParentNode) {
+        this.elementParentNode = document.createElement('div');
+        document.body.appendChild(this.elementParentNode);
+      }
+
+      _reactDom2.default.unstable_renderSubtreeIntoContainer(this, content, this.elementParentNode, function () {
+        _this2.createPopper();
+      });
+    }
+  }, {
+    key: 'createPopper',
+    value: function createPopper() {
+      var boundingElement = document.getElementById(this.props.parentId) || 'scrollParent';
 
       var configuration = {
         placement: 'bottom-start',
@@ -72,14 +129,14 @@ var PopperLoader = function (_React$Component) {
       };
 
       // create a new popper.js instance
-      var popper = new Popper(this.props.targetRef, this.refs.popupFrameRef, configuration);
+      this.popper = new _popper2.default(this.targetNode(), this.popupFrameNode(), configuration);
       // schedule the first update after the component has been fully rendered
       window.requestAnimationFrame(function () {
         popper.update();
       });
       // on each popper.js update, update the state
       popper.onUpdate(function (data) {
-        _this.setState({ data: data });
+        this.setState({ data: data });
       });
     }
   }, {
@@ -91,12 +148,8 @@ var PopperLoader = function (_React$Component) {
         top: 0,
         left: 0
       };
-      return _react2.default.createElement(
-        'div',
-        null,
-        _react2.default.createElement(this.props.popper, { ref: 'popper', text: 'pop', style: css }),
-        _react2.default.createElement(this.props.reference, { ref: 'reference', text: 'ref' })
-      );
+
+      return this.props.target;
     }
   }]);
 
